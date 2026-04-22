@@ -1,0 +1,161 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    name: Linux (Sniper SDK)
+    runs-on: ubuntu-latest
+    container:
+      image: registry.gitlab.steamos.cloud/steamrt/sniper/sdk:latest
+      options: --user root
+    steps:
+      - name: Install build prerequisites
+        run: |
+          set -eux
+          if ! command -v git >/dev/null || ! command -v pip3 >/dev/null; then
+            apt-get update -qq
+            apt-get install -y --no-install-recommends git python3-pip
+          fi
+          pip3 install --quiet git+https://github.com/alliedmodders/ambuild
+
+      - name: Checkout plugin
+        uses: actions/checkout@v4
+        with:
+          path: cs2-fake-rcon
+
+      - name: Clone hl2sdk-cs2
+        run: git clone --depth 1 --branch cs2 https://github.com/alliedmodders/hl2sdk hl2sdk-root/hl2sdk-cs2
+
+      - name: Clone metamod-source
+        run: git clone --depth 1 --recursive https://github.com/alliedmodders/metamod-source metamod-source
+
+      - name: Clone hl2sdk-manifests
+        run: git clone --depth 1 https://github.com/alliedmodders/hl2sdk-manifests hl2sdk-manifests
+
+      - name: Configure
+        working-directory: cs2-fake-rcon
+        env:
+          CC: clang
+          CXX: clang++
+          HL2SDKCS2: ${{ github.workspace }}/hl2sdk-root/hl2sdk-cs2
+          MMSOURCE112: ${{ github.workspace }}/metamod-source
+        run: |
+          set -eux
+          mkdir -p build
+          cd build
+          python3 ../configure.py \
+            -s cs2 \
+            --targets=x86_64 \
+            --plugin-name=fake_rcon \
+            --plugin-alias=fake_rcon \
+            --enable-optimize \
+            --hl2sdk-root="${GITHUB_WORKSPACE}/hl2sdk-root" \
+            --mms_path="${GITHUB_WORKSPACE}/metamod-source" \
+            --hl2sdk-manifests="${GITHUB_WORKSPACE}/hl2sdk-manifests"
+
+      - name: Build
+        working-directory: cs2-fake-rcon/build
+        run: ambuild
+
+      - name: Package linux.tar.gz
+        working-directory: cs2-fake-rcon/build/package
+        run: tar -czf "${GITHUB_WORKSPACE}/linux.tar.gz" addons
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: linux.tar.gz
+          if-no-files-found: error
+
+  windows:
+    name: Windows (MSVC)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout plugin
+        uses: actions/checkout@v4
+        with:
+          path: cs2-fake-rcon
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install ambuild
+        run: pip install --quiet git+https://github.com/alliedmodders/ambuild
+
+      - name: Setup MSVC (x64)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Clone hl2sdk-cs2
+        run: git clone --depth 1 --branch cs2 https://github.com/alliedmodders/hl2sdk hl2sdk-root/hl2sdk-cs2
+
+      - name: Clone metamod-source
+        run: git clone --depth 1 --recursive https://github.com/alliedmodders/metamod-source metamod-source
+
+      - name: Clone hl2sdk-manifests
+        run: git clone --depth 1 https://github.com/alliedmodders/hl2sdk-manifests hl2sdk-manifests
+
+      - name: Configure
+        working-directory: cs2-fake-rcon
+        shell: cmd
+        env:
+          HL2SDKCS2: ${{ github.workspace }}\hl2sdk-root\hl2sdk-cs2
+          MMSOURCE112: ${{ github.workspace }}\metamod-source
+        run: |
+          if not exist build mkdir build
+          cd build
+          python ..\configure.py -s cs2 --targets=x86_64 --plugin-name=fake_rcon --plugin-alias=fake_rcon --enable-optimize --hl2sdk-root="%GITHUB_WORKSPACE%\hl2sdk-root" --mms_path="%GITHUB_WORKSPACE%\metamod-source" --hl2sdk-manifests="%GITHUB_WORKSPACE%\hl2sdk-manifests"
+
+      - name: Build
+        working-directory: cs2-fake-rcon/build
+        shell: cmd
+        run: ambuild
+
+      - name: Package windows.zip
+        working-directory: cs2-fake-rcon/build/package
+        shell: pwsh
+        run: Compress-Archive -Path addons -DestinationPath "$env:GITHUB_WORKSPACE\windows.zip"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: windows.zip
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: [linux, windows]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/linux/linux.tar.gz
+            artifacts/windows/windows.zip
+          fail_on_unmatched_files: true
+          generate_release_notes: true
