@@ -2,8 +2,7 @@ name: release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -13,8 +12,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  version:
+    name: Read version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.extract.outputs.version }}
+      tag: ${{ steps.extract.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract plugin version from fakercon.cpp
+        id: extract
+        run: |
+          VERSION=$(awk '/FakeRcon::GetVersion/{f=1} f && /return/{match($0,/"[^"]+"/); print substr($0,RSTART+1,RLENGTH-2); exit}' fakercon.cpp)
+          if [ -z "$VERSION" ]; then
+            echo "Failed to extract version from fakercon.cpp" >&2
+            exit 1
+          fi
+          echo "Plugin version: $VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION"    >> "$GITHUB_OUTPUT"
+
   linux:
     name: Linux (Sniper SDK)
+    needs: version
     runs-on: ubuntu-latest
     container:
       image: registry.gitlab.steamos.cloud/steamrt/sniper/sdk:latest
@@ -68,19 +89,23 @@ jobs:
         working-directory: cs2-fake-rcon/build
         run: ambuild
 
-      - name: Package linux.tar.gz
-        working-directory: cs2-fake-rcon/build/package
-        run: tar -czf "${GITHUB_WORKSPACE}/linux.tar.gz" addons
+      - name: Stage addons/
+        run: |
+          set -eux
+          rm -rf dist
+          mkdir -p dist
+          cp -r cs2-fake-rcon/build/package/addons dist/addons
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: linux
-          path: linux.tar.gz
+          path: dist/
           if-no-files-found: error
 
   windows:
     name: Windows (MSVC)
+    needs: version
     runs-on: windows-latest
     steps:
       - name: Checkout plugin
@@ -126,36 +151,65 @@ jobs:
         shell: cmd
         run: ambuild
 
-      - name: Package windows.zip
-        working-directory: cs2-fake-rcon/build/package
+      - name: Stage addons/
         shell: pwsh
-        run: Compress-Archive -Path addons -DestinationPath "$env:GITHUB_WORKSPACE\windows.zip"
+        run: |
+          Remove-Item -Recurse -Force dist -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Path dist | Out-Null
+          Copy-Item -Recurse cs2-fake-rcon/build/package/addons dist/addons
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows
-          path: windows.zip
+          path: dist/
           if-no-files-found: error
 
   release:
     name: Publish GitHub Release
-    needs: [linux, windows]
-    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [version, linux, windows]
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
+      - name: Check if release already exists
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.version.outputs.tag }}
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $TAG already exists — skipping."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Download artifacts
+        if: steps.check.outputs.exists == 'false'
         uses: actions/download-artifact@v4
         with:
           path: artifacts
 
+      - name: Build release archives
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          set -eux
+          test -d artifacts/linux/addons
+          test -d artifacts/windows/addons
+          tar -C artifacts/linux   -czf linux.tar.gz addons
+          (cd artifacts/windows && zip -rq "$GITHUB_WORKSPACE/windows.zip" addons)
+
       - name: Create release
+        if: steps.check.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ needs.version.outputs.tag }}
+          name: ${{ needs.version.outputs.tag }}
+          target_commitish: ${{ github.sha }}
           files: |
-            artifacts/linux/linux.tar.gz
-            artifacts/windows/windows.zip
+            linux.tar.gz
+            windows.zip
           fail_on_unmatched_files: true
           generate_release_notes: true
