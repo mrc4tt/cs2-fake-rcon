@@ -98,7 +98,7 @@ void CFileManager::CleanCache()
 bool CFileManager::IsSteamIdCached(const char *steamid)
 {
     if (!steamid || !*steamid)
-        return false
+        return false;
 
     KeyValues *kv = new KeyValues("Config");
     KeyValues::AutoDelete autoDelete(kv);
