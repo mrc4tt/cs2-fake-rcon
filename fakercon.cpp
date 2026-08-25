@@ -225,7 +225,7 @@ const char *FakeRcon::GetLicense()
 
 const char *FakeRcon::GetVersion()
 {
-	return "1.3.0";
+	return "1.3.1";
 }
 
 const char *FakeRcon::GetDate()
@@ -245,7 +245,7 @@ const char *FakeRcon::GetAuthor()
 
 const char *FakeRcon::GetDescription()
 {
-	return "Like the real RCON but it's not the real RCON, thank you Valve";
+	return "Like the real RCON, but it's not the real RCON, thank you Valve";
 }
 
 const char *FakeRcon::GetName()
