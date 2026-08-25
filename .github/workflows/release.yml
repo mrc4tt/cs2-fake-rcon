@@ -19,7 +19,7 @@ jobs:
       version: ${{ steps.extract.outputs.version }}
       tag: ${{ steps.extract.outputs.tag }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Extract plugin version from fakercon.cpp
         id: extract
@@ -51,7 +51,7 @@ jobs:
           pip3 install --quiet git+https://github.com/alliedmodders/ambuild
 
       - name: Checkout plugin
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           path: cs2-fake-rcon
 
@@ -97,7 +97,7 @@ jobs:
           cp -r cs2-fake-rcon/build/package/addons dist/addons
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: linux
           path: dist/
@@ -109,12 +109,12 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout plugin
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           path: cs2-fake-rcon
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.x'
 
@@ -159,7 +159,7 @@ jobs:
           Copy-Item -Recurse cs2-fake-rcon/build/package/addons dist/addons
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: windows
           path: dist/
@@ -188,7 +188,7 @@ jobs:
 
       - name: Download artifacts
         if: steps.check.outputs.exists == 'false'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           path: artifacts
 
@@ -203,7 +203,7 @@ jobs:
 
       - name: Create release
         if: steps.check.outputs.exists == 'false'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.version.outputs.tag }}
           name: ${{ needs.version.outputs.tag }}
