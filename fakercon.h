@@ -2,7 +2,6 @@
 
 #include <ISmmPlugin.h>
 #include <igameevents.h>
-#include <iplayerinfo.h>
 
 class FakeRcon : public ISmmPlugin, public IMetamodListener
 {
