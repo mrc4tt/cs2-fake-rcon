@@ -131,8 +131,7 @@ jobs:
       - name: Clone metamod-source
         run: |
           git clone --depth 1 https://github.com/alliedmodders/metamod-source metamod-source
-          cd metamod-source
-          git submodule update --init --recursive
+          git -C metamod-source submodule update --init --recursive
 
       - name: Clone hl2sdk-manifests
         run: git clone --depth 1 https://github.com/alliedmodders/hl2sdk-manifests hl2sdk-manifests
