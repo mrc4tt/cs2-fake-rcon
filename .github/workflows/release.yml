@@ -45,11 +45,10 @@ jobs:
         run: |
           set -eux
           if ! command -v git >/dev/null || ! command -v pip3 >/dev/null; then
-            apt-get update -qq
+            apt-get -o Acquire::Check-Valid-Until=false update -qq
             apt-get install -y --no-install-recommends git python3-pip
           fi
           pip3 install --quiet git+https://github.com/alliedmodders/ambuild
-
       - name: Checkout plugin
         uses: actions/checkout@v7
         with:
@@ -130,7 +129,10 @@ jobs:
         run: git clone --depth 1 --branch cs2 https://github.com/alliedmodders/hl2sdk hl2sdk-root/hl2sdk-cs2
 
       - name: Clone metamod-source
-        run: git clone --depth 1 --recursive https://github.com/alliedmodders/metamod-source metamod-source
+        run: |
+          git clone --depth 1 https://github.com/alliedmodders/metamod-source metamod-source
+          cd metamod-source
+          git submodule update --init --recursive
 
       - name: Clone hl2sdk-manifests
         run: git clone --depth 1 https://github.com/alliedmodders/hl2sdk-manifests hl2sdk-manifests
