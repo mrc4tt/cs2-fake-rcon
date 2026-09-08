@@ -3,16 +3,23 @@
 #include <ISmmPlugin.h>
 #include <igameevents.h>
 
+class ISource2GameClients;
+
 class FakeRcon : public ISmmPlugin, public IMetamodListener
 {
 public:
+	FakeRcon();
+
 	bool Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late);
 	bool Unload(char *error, size_t maxlen);
 	bool Pause(char *error, size_t maxlen);
 	bool Unpause(char *error, size_t maxlen);
 	void AllPluginsLoaded();
 
-	void Hook_ClientFullyConnect( CPlayerSlot nSlot );
+	KHook::Return<void> Hook_ClientFullyConnect( ISource2GameClients *, CPlayerSlot nSlot );
+
+protected:
+	KHook::Virtual<ISource2GameClients, void, CPlayerSlot> m_ClientFullyConnect;
 
 public:
 	const char *GetAuthor();

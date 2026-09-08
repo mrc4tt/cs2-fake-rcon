@@ -18,8 +18,6 @@ void Debug(const char *msg, ...)
 	va_end(args);
 }
 
-SH_DECL_HOOK1_void(ISource2GameClients, ClientFullyConnect, SH_NOATTRIB, false, CPlayerSlot);
-
 FakeRcon g_FakeRcon;
 IServerGameDLL *server = NULL;
 ISource2GameClients *gameclients = NULL;
@@ -32,6 +30,11 @@ PlayerData g_playerData[MAXPLAYERS + 1];
 
 const char *g_szRconPassword;
 
+FakeRcon::FakeRcon() :
+	m_ClientFullyConnect(&ISource2GameClients::ClientFullyConnect, this, &FakeRcon::Hook_ClientFullyConnect, nullptr)
+{
+}
+
 PLUGIN_EXPOSE(FakeRcon, g_FakeRcon);
 bool FakeRcon::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool late)
 {
@@ -43,7 +46,7 @@ bool FakeRcon::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool
 	GET_V_IFACE_CURRENT(GetEngineFactory, icvar, ICvar, CVAR_INTERFACE_VERSION);
 	GET_V_IFACE_CURRENT(GetFileSystemFactory, g_fileSystem, IFileSystem, FILESYSTEM_INTERFACE_VERSION);
 
-	SH_ADD_HOOK_MEMFUNC(ISource2GameClients, ClientFullyConnect, gameclients, this, &FakeRcon::Hook_ClientFullyConnect, false);
+	m_ClientFullyConnect.Add(gameclients);
 
 	g_fileManager = new CFileManager();
 
@@ -80,7 +83,7 @@ bool FakeRcon::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool
 
 bool FakeRcon::Unload(char *error, size_t maxlen)
 {
-	SH_REMOVE_HOOK_MEMFUNC(ISource2GameClients, ClientFullyConnect, gameclients, this, &FakeRcon::Hook_ClientFullyConnect, false);
+	m_ClientFullyConnect.Remove(gameclients);
 
 	free(const_cast<char *>(g_szRconPassword));
 	g_szRconPassword = nullptr;
@@ -94,10 +97,12 @@ void FakeRcon::AllPluginsLoaded()
 {
 }
 
-void FakeRcon::Hook_ClientFullyConnect(CPlayerSlot slot)
+KHook::Return<void> FakeRcon::Hook_ClientFullyConnect(ISource2GameClients *, CPlayerSlot slot)
 {
 	PlayerData *pData = &g_playerData[slot.Get()];
 	pData->logged = false; // Unlog for the security, the cache will be checked after the first fake_rcon cmd typed by the client
+
+	return { KHook::Action::Ignore };
 }
 
 CON_COMMAND_EXTERN(fake_rcon_cache_clean, Command_FakeRconCacheClean, "Clean the fake rcon cache");
