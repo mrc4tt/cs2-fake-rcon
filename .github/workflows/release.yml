@@ -45,11 +45,16 @@ jobs:
         run: |
           set -eux
           if ! command -v git >/dev/null || ! command -v pip3 >/dev/null; then
-            # Sniper is Debian 11 (bullseye), which is EOL: point every apt
-            # source (incl. bullseye-security) at archive.debian.org.
-            find /etc/apt -name '*.list' -o -name '*.sources' | xargs -r sed -i -E \
-              -e 's#https?://(deb|security)\.debian\.org/debian-security#http://archive.debian.org/debian-security#g' \
+            # Sniper is Debian 11 (bullseye), which is EOL: bullseye-security is
+            # gone from deb.debian.org and not on archive.debian.org, so drop the
+            # security sources and point the rest at archive.debian.org.
+            find /etc/apt -name '*.list' | xargs -r sed -i -E \
+              -e '/debian-security/d' \
               -e 's#https?://deb\.debian\.org/debian#http://archive.debian.org/debian#g'
+            for f in $(find /etc/apt -name '*.sources'); do
+              awk -v RS= -v ORS='\n\n' '!/debian-security/' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+              sed -i -E 's#https?://deb\.debian\.org/debian#http://archive.debian.org/debian#g' "$f"
+            done
             apt-get -o Acquire::Check-Valid-Until=false update -qq
             apt-get install -y --no-install-recommends git python3-pip
           fi
