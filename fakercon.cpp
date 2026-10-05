@@ -52,8 +52,9 @@ bool FakeRcon::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool
 
 	if (CommandLine()->HasParm("-fakercon"))
 	{
+		// ParmValue returns NULL when -fakercon has no value (e.g. it is the last argument).
 		const char *rconPasswordConst = CommandLine()->ParmValue("-fakercon");
-		g_szRconPassword = strdup(rconPasswordConst);
+		g_szRconPassword = rconPasswordConst ? strdup(rconPasswordConst) : nullptr;
 
 		Debug("[FAKE RCON] Fetching RCON from -fakercon command line");
 	}
@@ -116,7 +117,7 @@ void Command_FakeRconCacheClean(const CCommandContext &context, const CCommand &
 {
 	CPlayerSlot slot = context.GetPlayerSlot();
 
-	if (!slot.IsValid())
+	if (g_szRconPassword == nullptr || !slot.IsValid())
 	{
 		return;
 	}
