@@ -65,10 +65,15 @@ bool FakeRcon::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool
 		Debug("[FAKE RCON] Fetching RCON from %s", CONFIG_FILE);
 	}
 
-	if (!g_szRconPassword || strlen(g_szRconPassword) < 4)
+	// A missing, short or default password must disable fake_rcon, not just warn: the commands only check for
+	// nullptr, and "changeme" is what CFileManager writes on first run, i.e. a publicly known password.
+	if (!g_szRconPassword || strlen(g_szRconPassword) < 4 || !V_stricmp(g_szRconPassword, "changeme"))
 	{
-		Debug("[FAKE RCON] Password is missing or too short (min 4 chars).");
+		Debug("[FAKE RCON] Password is missing, too short (min 4 chars) or still the default \"changeme\" - fake_rcon is DISABLED.");
 		Debug("[FAKE RCON] Set it in game/csgo/%s (Valve KeyValues format) or via the -fakercon launch parameter.", CONFIG_FILE);
+
+		free(const_cast<char *>(g_szRconPassword));
+		g_szRconPassword = nullptr;
 	}
 	else
 	{
