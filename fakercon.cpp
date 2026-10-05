@@ -72,7 +72,8 @@ bool FakeRcon::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool
 	}
 	else
 	{
-		Debug("[FAKE RCON] Fake rcon is %s", g_szRconPassword);
+		// Never print the password itself: console output ends up in server logs and panel consoles.
+		Debug("[FAKE RCON] Password set (%zu chars)", strlen(g_szRconPassword));
 	}
 
 	g_pCVar = icvar;
