@@ -65,7 +65,7 @@ jobs:
           path: cs2-fake-rcon
 
       - name: Clone hl2sdk-cs2
-        run: git clone --depth 1 --branch cs2 https://github.com/alliedmodders/hl2sdk hl2sdk-root/hl2sdk-cs2
+        run: git clone --depth 1 --branch cs2 https://github.com/alliedmodders/s2sdk hl2sdk-root/hl2sdk-cs2
 
       - name: Clone metamod-source
         run: git clone --depth 1 --recursive https://github.com/alliedmodders/metamod-source metamod-source
@@ -136,7 +136,7 @@ jobs:
           arch: x64
 
       - name: Clone hl2sdk-cs2
-        run: git clone --depth 1 --branch cs2 https://github.com/alliedmodders/hl2sdk hl2sdk-root/hl2sdk-cs2
+        run: git clone --depth 1 --branch cs2 https://github.com/alliedmodders/s2sdk hl2sdk-root/hl2sdk-cs2
 
       - name: Clone metamod-source
         run: |
