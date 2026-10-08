@@ -1,22 +1,39 @@
-[Buy Me A Coffee ♥︎](https://www.buymeacoffee.com/kriax)
+# CS2 Fake RCON
+
+An extension for Counter-Strike 2 that restores RCON functionality by adding custom RCON commands.
 
 ## Features
-Fakercon adds the fake_rcon_password and fake_rcon commands because Valve has not integrated the original command into the game (or it is broken).
+
+FakeRCON adds the `fake_rcon_password` and `fake_rcon` commands to Counter-Strike 2, compensating for Valve's omission or breaking of the native RCON functionality.
 
 ## Installation
-- [Linux](https://github.com/Salvatore-Als/cs2-fake-rcon/releases/latest/download/linux.tar.gz)
-- [Windows](https://github.com/Salvatore-Als/cs2-fake-rcon/releases/latest/download/windows.zip)
 
-You can choose between Linux and Windows, and then unpack the package (`.tar.gz` or `.zip`).
+1. Download the package for your operating system:
+   - [Linux](https://github.com/mrc4tt/cs2-fake-rcon/releases/latest/download/linux.tar.gz)
+   - [Windows](https://github.com/mrc4tt/cs2-fake-rcon/releases/latest/download/windows.zip)
+2. Extract the downloaded archive (`.tar.gz` or `.zip`).
+3. Upload the **fake_rcon** folder to your server path at `game/csgo/addons`.
 
-Then upload the **fake_rcon** to the path `game/csgo/addons`, where the addons folder should be located.
+## Configuration
 
-## How to configure it?
-https://forums.alliedmods.net/showpost.php?p=2811082&postcount=15
+For setup instructions and configuration details, refer to the [AlliedModders Guide](https://forums.alliedmods.net/showpost.php?p=2811082&postcount=15).
 
-**The password must be at least 4 characters long. We use a file because convar management is not yet complete on the CS2 SDK**
+> **Note:** The password must be at least **4 characters long**. A configuration file is used because ConVar management is currently incomplete in the CS2 SDK.
 
-## How to use it?
+## Usage
+
+Set your RCON password:
+```text
 fake_rcon_password YOURPWD
+```
 
+Execute commands:
+
+```text
 fake_rcon say hello
+```
+
+## Credits
+
+* **Original Creator:** [Kriax](https://github.com/Salvatore-Als/cs2-fake-rcon)
+* **Maintainer:** [mrc4tt](https://github.com/mrc4tt)
