@@ -1,6 +1,6 @@
 #include <filemanager.h>
 #include <tier0/platform.h>
-#include "filesystem.h"
+#include "filesystem/ifilesystem.h"
 #include "tier0/dbg.h"
 
 static bool MigrateFile(const char *oldPath, const char *newPath)
