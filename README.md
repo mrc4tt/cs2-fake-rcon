@@ -18,7 +18,7 @@ FakeRCON adds the `fake_rcon_password` and `fake_rcon` commands to Counter-Strik
 
 For setup instructions and configuration details, refer to the [AlliedModders Guide](https://forums.alliedmods.net/showpost.php?p=2811082&postcount=15).
 
-> **Note:** The password must be at least **4 characters long**. A configuration file is used because ConVar management is currently incomplete in the CS2 SDK.
+> **Note:** The password must be at least **4 characters long**. The password is read from a configuration file rather than a ConVar, so it is not exposed in `server.cfg`, launch options or `cvarlist`.
 
 ## Usage
 
