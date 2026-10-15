@@ -237,7 +237,7 @@ const char *FakeRcon::GetLicense()
 
 const char *FakeRcon::GetVersion()
 {
-	return "1.3.4";
+	return "1.3.5";
 }
 
 const char *FakeRcon::GetDate()
