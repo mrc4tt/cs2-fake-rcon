@@ -1,8 +1,8 @@
 name: release
 
+# Releases are built and published locally (cs2-build-system/build-all.sh --release);
+# this workflow only runs on demand or for pull requests.
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
