@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "KeyValues.h"
+#include "tier0/keyvalues.h"
 #include <ctime>
 #include "abstract.h"
 

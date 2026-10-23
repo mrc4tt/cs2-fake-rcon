@@ -4,6 +4,8 @@
 #include "filemanager.h"
 #include "abstract.h"
 #include "tier0/icommandline.h"
+#include <engine2/isource2server.h>
+#include <engine2/ivengineserver2.h>
 
 void Debug(const char *msg, ...)
 {
@@ -19,7 +21,6 @@ void Debug(const char *msg, ...)
 }
 
 FakeRcon g_FakeRcon;
-IServerGameDLL *server = NULL;
 ISource2GameClients *gameclients = NULL;
 IVEngineServer2 *engine = NULL;
 ICvar *icvar = NULL;
@@ -40,7 +41,6 @@ bool FakeRcon::Load(PluginId id, ISmmAPI *ismm, char *error, size_t maxlen, bool
 {
 	PLUGIN_SAVEVARS();
 
-	GET_V_IFACE_ANY(GetServerFactory, server, IServerGameDLL, INTERFACEVERSION_SERVERGAMEDLL);
 	GET_V_IFACE_ANY(GetServerFactory, gameclients, ISource2GameClients, SOURCE2GAMECLIENTS_INTERFACE_VERSION);
 	GET_V_IFACE_CURRENT(GetEngineFactory, engine, IVEngineServer2, SOURCE2ENGINETOSERVER_INTERFACE_VERSION);
 	GET_V_IFACE_CURRENT(GetEngineFactory, icvar, ICvar, CVAR_INTERFACE_VERSION);
@@ -237,7 +237,7 @@ const char *FakeRcon::GetLicense()
 
 const char *FakeRcon::GetVersion()
 {
-	return "1.3.4";
+	return "1.3.5";
 }
 
 const char *FakeRcon::GetDate()

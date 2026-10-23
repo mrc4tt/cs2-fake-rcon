@@ -292,9 +292,13 @@ class MMSPluginConfig(object):
 
     if sdk['source2']:
       cxx.defines += ['META_IS_SOURCE2']
+      # s2sdk moved convar.cpp from tier1/ to tier0_perproject/ (2026-10).
+      convar = os.path.join(sdk['path'], 'tier0_perproject', 'convar.cpp')
+      if not os.path.isfile(convar):
+        convar = os.path.join(sdk['path'], 'tier1', 'convar.cpp')
       binary.sources += [
         os.path.join(sdk['path'], 'public', 'tier0', 'memoverride.cpp'),
-        os.path.join(sdk['path'], 'tier1', 'convar.cpp'),
+        convar,
       ]
 
     SdkHelpers.configureCxx(context, binary, sdk)
