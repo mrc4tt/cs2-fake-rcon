@@ -8,11 +8,20 @@ FakeRCON adds the `fake_rcon_password` and `fake_rcon` commands to Counter-Strik
 
 ## Installation
 
-1. Download the package for your operating system:
-   - [Linux](https://github.com/mrc4tt/cs2-fake-rcon/releases/latest/download/linux.tar.gz)
-   - [Windows](https://github.com/mrc4tt/cs2-fake-rcon/releases/latest/download/windows.zip)
-2. Extract the downloaded archive (`.tar.gz` or `.zip`).
-3. Upload the **fake_rcon** folder to your server path at `game/csgo/addons`.
+1. Download the package for your server from the [latest release](https://github.com/mrc4tt/cs2-fake-rcon/releases/latest) (see [Which download?](#which-download) below).
+2. Extract the archive into your server's `game/csgo` directory (it contains `addons/fake_rcon` and `addons/metamod`).
+
+### Which download?
+
+Every [release](https://github.com/mrc4tt/cs2-fake-rcon/releases/latest) has three packages:
+
+| Package | For |
+| --- | --- |
+| `cs2-fake-rcon-<version>-steamrt3.tar.gz` | Linux servers. The CS2 dedicated server runs in Steam Runtime 3 ("sniper"); this build loads there, in Steam Runtime 4 and on any newer distribution. **Take this one if unsure.** |
+| `cs2-fake-rcon-<version>-steamrt4.tar.gz` | Linux servers that run in Steam Runtime 4. |
+| `cs2-fake-rcon-<version>-windows.zip` | Windows servers. |
+
+The top of each release lists the exact glibc and libstdc++ every Linux build needs and the distributions it loads on. A build that is too new for the server fails at load time with `version 'GLIBC_2.xx' not found` in the console.
 
 ## Configuration
 
