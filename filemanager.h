@@ -18,22 +18,19 @@ public:
         Init();
     }
 
-    ~CFileManager()
-    {
-        free(g_szRconPassword);
-        g_szRconPassword = nullptr;
-    }
 
     void CleanCache();
     bool IsSteamIdCached(const char *steamid);
     void AddSteamIdToCache(const char *steamid);
 
     int GetCacheTime() { return g_cacheTime; }
-    const char *GetRconPassword() { return g_szRconPassword; }
+    // nullptr when the config has no password.
+    const char *GetRconPassword() { return m_hasRconPassword ? m_rconPassword.c_str() : nullptr; }
 
 private:
     int g_cacheTime = 120;
-    char *g_szRconPassword = nullptr;
+    std::string m_rconPassword;
+    bool m_hasRconPassword = false;
     void Init();
 };
 

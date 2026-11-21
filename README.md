@@ -42,6 +42,16 @@ Execute commands:
 fake_rcon say hello
 ```
 
+## Self test
+
+From the server console (or RCON), not as a player:
+
+```text
+fake_rcon_selftest
+```
+
+It checks the parts a CS2 update can break (engine interfaces, the password check, config and cache access) and ends in `SELFTEST PASS` or `SELFTEST FAIL`. It changes nothing on a normal server. Every release is built and then tested this way on a real CS2 server before it is published; there the server is started with `-fake_rcon_selftest`, which also plays a player through `fake_rcon_password` and `fake_rcon` using a bot.
+
 ## Support
 
 Need help, found a bug, or have a feature idea? Join the Discord support server:

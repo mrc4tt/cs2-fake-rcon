@@ -59,7 +59,6 @@ void CFileManager::Init()
         Debug("[FAKE RCON] Failed to load config file: %s", CONFIG_FILE);
         Debug("[FAKE RCON] The config must be in Valve KeyValues format, e.g.:");
         Debug("[FAKE RCON]   \"Config\" { \"rcon_password\" \"mypassword\" \"caching_time\" \"120\" }");
-        g_szRconPassword = nullptr;
         return;
     }
 
@@ -69,11 +68,11 @@ void CFileManager::Init()
     if (!szRconPassword)
     {
         Debug("[FAKE RCON] rcon_password missing in config");
-        g_szRconPassword = nullptr;
         return;
     }
 
-    g_szRconPassword = strdup(szRconPassword);
+    m_rconPassword = szRconPassword;
+    m_hasRconPassword = true;
 
     // Create empty cache.cfg if missing
     if (!g_fileSystem->FileExists(CACHE_FILE, "MOD"))
