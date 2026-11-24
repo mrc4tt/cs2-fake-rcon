@@ -379,7 +379,7 @@ const char *FakeRcon::GetLicense()
 
 const char *FakeRcon::GetVersion()
 {
-	return "1.3.6";
+	return "1.3.7";
 }
 
 const char *FakeRcon::GetDate()
